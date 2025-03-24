@@ -1,0 +1,28 @@
+# ts gitignore
+
+# Ignore build output
+dist/
+build/
+node_modules/
+
+# Ignore local config
+config.local.ts
+
+# Ignore IDE files
+.vscode/
+.idea/
+
+# Ignore test output
+test-output/
+
+# Ignore logs
+logs/
+
+# Ignore coverage
+coverage/
+
+# Ignore package-lock.json
+package-lock.json
+
+# Ignore .env   
+.env

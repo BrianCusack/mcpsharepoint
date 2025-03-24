@@ -1,0 +1,31 @@
+{
+  "name": "sharepoint",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "types": "module",
+  "bin": {
+    "sharepoint": "./build/index.js"
+  },
+  "scripts": {
+    "build": "bun run tsc",
+    "start": "bun run build && bun ./build/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@azure/identity": "^4.8.0",
+    "@microsoft/microsoft-graph-client": "^3.0.7",
+    "@modelcontextprotocol/sdk": "^1.7.0",
+    "dotenv": "^16.4.7",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "typescript": "^5.8.2"
+  },
+  "engines": {
+    "bun": ">=0.5.0"
+  }
+}
