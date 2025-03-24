@@ -32,12 +32,37 @@ To use this server with the Claude Desktop app, add the following configuration 
         "run", 
         "-i", 
         "--rm", 
+        "--init", 
+        "-e", "DOCKER_CONTAINER=true",
+        "-e", "TENANT_ID=your-tenant-id",
+        "-e", "CLIENT_ID=your-client-id",
+        "-e", "CLIENT_SECRET=your-client-secret",
+        "-e", "SITE_ID=your-site-id",
         "mcp/sharepoint"
-        ]
+      ]
     }
   }
 }
 ```
+### Bun MCP configuration file
+
+```json
+{
+  "mcpServers": {
+    "sharepoint": {
+      "command": "bun",
+      "args": ["run", "start"],
+      "env": {
+        "TENANT_ID": "your-tenant-id",
+        "CLIENT_ID": "your-client-id",
+        "CLIENT_SECRET": "your-client-secret",
+        "SITE_ID": "your-site-id"
+      }
+    }
+  }
+}
+```
+
 
 
 ## License
