@@ -40,7 +40,7 @@ class SharepointConnector {
     this.siteId = config.siteId;
   }
 
-  async searchDocuments(query: string, maxResults: number = 10) {
+  async searchDocuments(query: string, maxResults = 10) {
     try {
       const searchResults = await this.client.api('/search/query')
         .post({
@@ -55,7 +55,7 @@ class SharepointConnector {
           }]
         });
 
-      return searchResults.value[0].hitsContainers[0].hits.map((hit: any) => ({
+      return searchResults.value[0].hitsContainers[0].hits.map((hit: { resource: { id: string; properties: { name: string; webUrl: string; lastModifiedDateTime: string; createdDateTime: string; size: number; author: string; filetype: string; }; }; }) => ({
         id: hit.resource.id,
         name: hit.resource.properties.name,
         url: hit.resource.properties.webUrl,
@@ -75,10 +75,10 @@ class SharepointConnector {
     try {
       // First get document metadata
       const document = await this.client.api(`/sites/${this.siteId}/drive/items/${documentId}`).get();
-      
+
       // Get the content based on file type
       const fileType = document.name.split('.').pop()?.toLowerCase();
-      
+
       if (['docx', 'xlsx', 'pptx'].includes(fileType)) {
         // For Office documents, get a text representation
         const content = await this.client.api(`/sites/${this.siteId}/drive/items/${documentId}/content`).get();
@@ -90,10 +90,9 @@ class SharepointConnector {
         };
       } else if (['txt', 'html', 'md', 'json', 'csv'].includes(fileType)) {
         // For text files, get the raw content
-        const content = await this.client.api(`/sites/${this.siteId}/drive/items/${documentId}/content`).get();
         return {
           metadata: document,
-          content: content
+          content: await this.client.api(`/sites/${this.siteId}/drive/items/${documentId}/content`).get()
         };
       } else if (['pdf'].includes(fileType)) {
         // For PDFs, you'd need additional processing to extract text
@@ -101,7 +100,7 @@ class SharepointConnector {
         const content = await this.client.api(`/sites/${this.siteId}/drive/items/${documentId}/content`).get();
         return {
           metadata: document,
-          content: "PDF content would be extracted here"
+          content: content
         };
       } else {
         return {
@@ -143,7 +142,7 @@ class SharepointConnector {
       } else {
         endpoint = `/sites/${this.siteId}/drive/root/children`;
       }
-      
+
       const items = await this.client.api(endpoint).get();
       return items.value;
     } catch (error) {
@@ -219,8 +218,8 @@ async function createSharepointMcpServer(config: SharepointConfig) {
       return {
         contents: [{
           uri: uri.href,
-          text: typeof result.content === 'string' 
-            ? result.content 
+          text: typeof result.content === 'string'
+            ? result.content
             : JSON.stringify(result.content, null, 2)
         }]
       };
@@ -301,7 +300,7 @@ async function createSharepointMcpServer(config: SharepointConfig) {
         role: "user",
         content: {
           type: "text",
-          text: folderId 
+          text: folderId
             ? `Please explore the contents of the folder with ID ${folderId} using the sharepoint://folder/${folderId} resource. List all documents and subfolders, organizing them by type and providing key details about each item.`
             : `Please explore the contents of the root folder using the sharepoint://folder resource. List all documents and subfolders, organizing them by type and providing key details about each item.`
         }
@@ -324,7 +323,7 @@ async function main() {
 
   // Create and start the server
   const server = await createSharepointMcpServer(config);
-  
+
   // Connect using stdio transport
   const transport = new StdioServerTransport();
   await server.connect(transport);
