@@ -1,4 +1,4 @@
-# Sharepoint
+# Sharepoint - WIP, just for R&D ATM
 
 A Model Context Protocol server that provides access to Organisational Sharepoint.
 
