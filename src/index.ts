@@ -1,205 +1,49 @@
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { Client } from "@microsoft/microsoft-graph-client";
-import { ClientSecretCredential } from "@azure/identity";
-import { TokenCredentialAuthenticationProvider } from "@microsoft/microsoft-graph-client/authProviders/azureTokenCredentials";
+import { register } from "microsoft-graph/services/context";
+import { getEnvironmentVariable } from "microsoft-graph/services/environmentVariable";
+import { TenantId } from "microsoft-graph/models/TenantId";
+import { ClientId } from "microsoft-graph/models/ClientId";
+import { SiteId } from "microsoft-graph/models/SiteId";
+import { ClientSecret } from "microsoft-graph/models/ClientSecret";
 import dotenv from "dotenv";
+
+import { createDriveRef } from "microsoft-graph/services/drive";
+import { get } from "http";
+import { createSiteRef } from "microsoft-graph/services/site";
+import { DriveId } from "microsoft-graph/models/DriveId";
+import listDriveItems from "microsoft-graph/operations/driveItem/listDriveItems";
+import { createDriveItemRef } from "microsoft-graph/services/driveItem";
+import { DriveItemId } from "microsoft-graph/models/DriveItemId";
+import getDriveItem from "microsoft-graph/operations/driveItem/getDriveItem";
 dotenv.config();
 
-// Configuration for Microsoft Graph API connection
-interface SharepointConfig {
-  tenantId: string;
-  clientId: string;
-  clientSecret: string;
-  siteId: string; // The ID or URL of your SharePoint site
-}
-
-class SharepointConnector {
-  private client: Client;
-  private siteId: string;
-
-  constructor(config: SharepointConfig) {
-    // Create a credential using client ID and secret
-    const credential = new ClientSecretCredential(
-      config.tenantId,
-      config.clientId,
-      config.clientSecret
-    );
-
-    // Create an auth provider for Microsoft Graph
-    const authProvider = new TokenCredentialAuthenticationProvider(credential, {
-      scopes: ['https://graph.microsoft.com/.default']
-    });
-
-    // Initialize the Graph client
-    this.client = Client.initWithMiddleware({
-      authProvider
-    });
-
-    this.siteId = config.siteId;
-  }
-
-  async searchDocuments(query: string, maxResults = 10) {
-    try {
-      const searchResults = await this.client.api('/search/query')
-        .post({
-          requests: [{
-            entityTypes: ["driveItem"],
-            query: {
-              queryString: query
-            },
-            from: 0,
-            size: maxResults,
-            fields: ["name", "webUrl", "lastModifiedDateTime", "createdDateTime", "size", "author", "filetype"]
-          }]
-        });
-
-      return searchResults.value[0].hitsContainers[0].hits.map((hit: { resource: { id: string; properties: { name: string; webUrl: string; lastModifiedDateTime: string; createdDateTime: string; size: number; author: string; filetype: string; }; }; }) => ({
-        id: hit.resource.id,
-        name: hit.resource.properties.name,
-        url: hit.resource.properties.webUrl,
-        lastModified: hit.resource.properties.lastModifiedDateTime,
-        created: hit.resource.properties.createdDateTime,
-        size: hit.resource.properties.size,
-        author: hit.resource.properties.author,
-        type: hit.resource.properties.filetype
-      }));
-    } catch (error) {
-      console.error("Error searching documents:", error);
-      throw error;
-    }
-  }
-
-  async getDocumentContent(documentId: string) {
-    try {
-      // First get document metadata
-      const document = await this.client.api(`/sites/${this.siteId}/drive/items/${documentId}`).get();
-
-      // Get the content based on file type
-      const fileType = document.name.split('.').pop()?.toLowerCase();
-
-      if (['docx', 'xlsx', 'pptx'].includes(fileType)) {
-        // For Office documents, get a text representation
-        const content = await this.client.api(`/sites/${this.siteId}/drive/items/${documentId}/content`).get();
-        // Note: In a real implementation, you would need to convert these file types to text
-        // This is a simplified placeholder
-        return {
-          metadata: document,
-          content: content
-        };
-      } else if (['txt', 'html', 'md', 'json', 'csv'].includes(fileType)) {
-        // For text files, get the raw content
-        return {
-          metadata: document,
-          content: await this.client.api(`/sites/${this.siteId}/drive/items/${documentId}/content`).get()
-        };
-      } else if (['pdf'].includes(fileType)) {
-        // For PDFs, you'd need additional processing to extract text
-        // This is a simplified placeholder
-        const content = await this.client.api(`/sites/${this.siteId}/drive/items/${documentId}/content`).get();
-        return {
-          metadata: document,
-          content: content
-        };
-      } else {
-        return {
-          metadata: document,
-          content: `Content extraction not supported for file type: ${fileType}`
-        };
-      }
-    } catch (error) {
-      console.error("Error getting document content:", error);
-      throw error;
-    }
-  }
-
-  async listSites() {
-    try {
-      const sites = await this.client.api('/sites').get();
-      return sites.value;
-    } catch (error) {
-      console.error("Error listing sites:", error);
-      throw error;
-    }
-  }
-
-  async listLibraries() {
-    try {
-      const libraries = await this.client.api(`/sites/${this.siteId}/drives`).get();
-      return libraries.value;
-    } catch (error) {
-      console.error("Error listing document libraries:", error);
-      throw error;
-    }
-  }
-
-  async listFolderContents(folderId?: string) {
-    try {
-      let endpoint;
-      if (folderId) {
-        endpoint = `/sites/${this.siteId}/drive/items/${folderId}/children`;
-      } else {
-        endpoint = `/sites/${this.siteId}/drive/root/children`;
-      }
-
-      const items = await this.client.api(endpoint).get();
-      return items.value;
-    } catch (error) {
-      console.error("Error listing folder contents:", error);
-      throw error;
-    }
-  }
-}
-
 // Initialize the MCP server and SharePoint connector
-async function createSharepointMcpServer(config: SharepointConfig) {
+async function createSharepointMcpServer() {
+  
+  const tenantId = getEnvironmentVariable("TENANT_ID") as TenantId;
+  const clientId = getEnvironmentVariable("CLIENT_ID") as ClientId;
+  const clientSecret = getEnvironmentVariable("CLIENT_SECRET") as ClientSecret;
+
+  const driveId = getEnvironmentVariable("DRIVE_ID") as DriveId;
+  const siteId = getEnvironmentVariable("SITE_ID") as SiteId;
   // Create the server
   const server = new McpServer({
     name: "SharePoint Server",
     version: "1.0.0"
   });
 
-  // Initialize SharePoint connector
-  const sharepoint = new SharepointConnector(config);
+  const contextRef = register(tenantId, clientId, clientSecret);
 
-  // Resource: List of SharePoint sites
-  server.resource(
-    "sites",
-    "sharepoint://sites",
-    async (uri) => {
-      const sites = await sharepoint.listSites();
-      return {
-        contents: [{
-          uri: uri.href,
-          text: JSON.stringify(sites, null, 2)
-        }]
-      };
-    }
-  );
-
-  // Resource: List of document libraries for the configured site
-  server.resource(
-    "libraries",
-    "sharepoint://libraries",
-    async (uri) => {
-      const libraries = await sharepoint.listLibraries();
-      return {
-        contents: [{
-          uri: uri.href,
-          text: JSON.stringify(libraries, null, 2)
-        }]
-      };
-    }
-  );
-
+  const siteRef = createSiteRef(contextRef, siteId);
+  const driveRef = createDriveRef(siteRef, driveId);
   // Resource: Folder contents (root or specific folder)
   server.resource(
     "folder",
     new ResourceTemplate("sharepoint://folder/{folderId?}", { list: undefined }),
-    async (uri, params) => {
-      const folderId = Array.isArray(params.folderId) ? params.folderId[0] : params.folderId;
-      const items = await sharepoint.listFolderContents(folderId);
+    async (uri) => {
+      const items = await listDriveItems(driveRef);
       return {
         contents: [{
           uri: uri.href,
@@ -214,7 +58,8 @@ async function createSharepointMcpServer(config: SharepointConfig) {
     "document",
     new ResourceTemplate("sharepoint://document/{documentId}", { list: undefined }),
     async (uri, { documentId }) => {
-      const result = await sharepoint.getDocumentContent(Array.isArray(documentId) ? documentId[0] : documentId);
+      const driveItemRef = createDriveItemRef(driveRef, documentId as DriveItemId);
+      const result = await getDriveItem(driveItemRef);
       return {
         contents: [{
           uri: uri.href,
@@ -235,7 +80,9 @@ async function createSharepointMcpServer(config: SharepointConfig) {
     },
     async ({ query, maxResults = 10 }) => {
       try {
-        const results = await sharepoint.searchDocuments(query, parseInt(maxResults.toString(), 10));
+        const driveRef = createDriveRef(siteRef, driveId);
+        const driveItems = await listDriveItems(driveRef);
+        const results = driveItems.filter((item: any) => item.name.includes(query)).slice(0, parseInt(maxResults.toString(), 10));
         return {
           content: [{
             type: "text",
@@ -313,16 +160,9 @@ async function createSharepointMcpServer(config: SharepointConfig) {
 
 // Example usage
 async function main() {
-  // Load configuration from environment variables or a config file
-  const config: SharepointConfig = {
-    tenantId: process.env.TENANT_ID || "",
-    clientId: process.env.CLIENT_ID || "",
-    clientSecret: process.env.CLIENT_SECRET || "",
-    siteId: process.env.SITE_ID || ""
-  };
 
   // Create and start the server
-  const server = await createSharepointMcpServer(config);
+  const server = await createSharepointMcpServer();
 
   // Connect using stdio transport
   const transport = new StdioServerTransport();

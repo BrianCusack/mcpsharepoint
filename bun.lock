@@ -8,7 +8,7 @@
         "@microsoft/microsoft-graph-client": "^3.0.7",
         "@modelcontextprotocol/sdk": "^1.7.0",
         "dotenv": "^16.4.7",
-        "microsoft-graph": "^1.0.6",
+        "microsoft-graph": "^2.1.0",
         "zod": "^3.24.2",
       },
       "devDependencies": {
@@ -357,7 +357,7 @@
 
     "micromatch": ["micromatch@4.0.8", "", { "dependencies": { "braces": "^3.0.3", "picomatch": "^2.3.1" } }, "sha512-PXwfBhYu0hBCPw8Dn0E+WDYb7af3dSLVWKi3HGv84IdF4TyFoC0ysxFd0Goxw7nSv4T/PzEJQxsYsEiFCKo2BA=="],
 
-    "microsoft-graph": ["microsoft-graph@1.0.6", "", { "dependencies": { "@azure/identity": "^4.7.0", "http-proxy-agent": "^7.0.2", "node-fetch": "^3.3.2" } }, "sha512-xQ6Yu+yCVmwVMr4Uku4o2r9DF9NIi08KERYNfvgAMw/+6z4WLmSncVosXpyC192RdE71M/ITLVa9B0jAOWCqjg=="],
+    "microsoft-graph": ["microsoft-graph@2.1.0", "", { "dependencies": { "@azure/identity": "^4.7.0", "https-proxy-agent": "^7.0.6", "node-fetch": "^3.3.2" } }, "sha512-sorKNRaDfnnmfvKDiFnCxEGeX4i6P2oDSFd9z9/fCbLMEo4mR9fdmC8ngxBJISXQJuo5amMdNmzeEM0L5wxwxw=="],
 
     "mime-db": ["mime-db@1.54.0", "", {}, "sha512-aU5EJuIN2WDemCcAp2vFBfp/m4EAhWJnUNSSw0ixs7/kXbd6Pg64EmwJkNdFhB8aWt1sH2CTXrLxo/iAGV3oPQ=="],
 

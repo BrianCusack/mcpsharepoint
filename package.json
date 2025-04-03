@@ -20,7 +20,7 @@
     "@microsoft/microsoft-graph-client": "^3.0.7",
     "@modelcontextprotocol/sdk": "^1.7.0",
     "dotenv": "^16.4.7",
-    "microsoft-graph": "^1.0.6",
+    "microsoft-graph": "^2.1.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
