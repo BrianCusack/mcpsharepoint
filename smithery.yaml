@@ -1,0 +1,44 @@
+# Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
+
+startCommand:
+  type: stdio
+  configSchema:
+    # JSON Schema defining the configuration options for the MCP.
+    type: object
+    required:
+      - tenantId
+      - clientId
+      - clientSecret
+      - siteId
+    properties:
+      tenantId:
+        type: string
+        description: Azure tenant identifier.
+      clientId:
+        type: string
+        description: Azure client id for Microsoft Graph authentication.
+      clientSecret:
+        type: string
+        description: Azure client secret for Microsoft Graph authentication.
+      siteId:
+        type: string
+        description: SharePoint site identifier.
+  commandFunction:
+    # A JS function that produces the CLI command based on the given config to start the MCP on stdio.
+    |-
+    (config) => ({
+      // Use pre-built code in /build
+      command: 'bun',
+      args: ['./build/index.js'],
+      env: {
+        TENANT_ID: config.tenantId,
+        CLIENT_ID: config.clientId,
+        CLIENT_SECRET: config.clientSecret,
+        SITE_ID: config.siteId
+      }
+    })
+  exampleConfig:
+    tenantId: example-tenant-id
+    clientId: example-client-id
+    clientSecret: example-client-secret
+    siteId: example-site-id

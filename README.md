@@ -1,4 +1,5 @@
 # Sharepoint - WIP, just for R&D ATM
+[![smithery badge](https://smithery.ai/badge/@BrianCusack/mcpsharepoint)](https://smithery.ai/server/@BrianCusack/mcpsharepoint)
 
 A Model Context Protocol server that provides access to Organisational Sharepoint.
 
@@ -18,6 +19,14 @@ A Model Context Protocol server that provides access to Organisational Sharepoin
 ## Usage with Claude Desktop
 
 To use this server with the Claude Desktop app, add the following configuration to the "mcpServers" section of your `claude_desktop_config.json`:
+
+### Installing via Smithery
+
+To install Sharepoint for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@BrianCusack/mcpsharepoint):
+
+```bash
+npx -y @smithery/cli install @BrianCusack/mcpsharepoint --client claude
+```
 
 ### Docker
 
