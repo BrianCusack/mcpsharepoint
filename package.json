@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "types": "module",
+  "type": "module",
   "bin": {
     "sharepoint": "./build/index.js"
   },
   "scripts": {
     "build": "bun run tsc",
-    "start": "bun run build && bun ./build/index.js",
+    "start": "bun src/index.ts",
     "lint": "bun run eslint --config eslint.config.ts"
   },
   "keywords": [],
