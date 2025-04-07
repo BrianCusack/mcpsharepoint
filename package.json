@@ -18,9 +18,9 @@
   "dependencies": {
     "@azure/identity": "^4.8.0",
     "@microsoft/microsoft-graph-client": "^3.0.7",
-    "@modelcontextprotocol/sdk": "^1.7.0",
+    "@modelcontextprotocol/sdk": "^1.9.0",
     "dotenv": "^16.4.7",
-    "microsoft-graph": "^2.1.0",
+    "microsoft-graph": "^2.7.6",
     "zod": "^3.24.2"
   },
   "devDependencies": {

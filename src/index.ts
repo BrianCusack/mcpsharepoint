@@ -163,6 +163,12 @@ async function main() {
 
   // Create and start the server
   const server = await createSharepointMcpServer();
+  
+  // Log available capabilities
+  console.log("SharePoint MCP Server initialized with:");
+  console.log("Resources: sharepoint://folder/{folderId?}, sharepoint://document/{documentId}");
+  console.log("Tools: search-documents");
+  console.log("Prompts: document-summary, find-relevant-documents, explore-folder");
 
   // Connect using stdio transport
   const transport = new StdioServerTransport();
