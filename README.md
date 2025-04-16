@@ -48,6 +48,14 @@ A Model Context Protocol server that provides access to Organisational Sharepoin
 - Copy .env.example as .env
 - Fill the requires fields
 
+## Inspector
+
+From root
+
+```Bash
+npx @modelcontextprotocol/inspector -e TENANT_ID=your_tenant_id -e CLIENT_ID=your_client_id -e CLIENT_SECRET=your_client_secret -e SITE_ID=your_site_id -e DRIVE_ID=your_drive_id -- node dist/index.js
+```
+
 ## Usage with Claude Desktop
 
 To use this server with the Claude Desktop app, add the following configuration to the "mcpServers" section of your `claude_desktop_config.json`:
