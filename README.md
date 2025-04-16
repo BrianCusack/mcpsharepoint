@@ -45,13 +45,17 @@ To use this server with the Claude Desktop app, add the following configuration 
   }
 }
 ```
-### Bun MCP configuration file
+###  MCP configuration file
+
+```bash
+pnpm run build
+```
 
 ```json
 {
   "mcpServers": {
     "sharepoint": {
-      "command": "bun",
+      "command": "node",
       "args": ["run", "start"],
       "env": {
         "TENANT_ID": "your-tenant-id",
