@@ -2,13 +2,46 @@
 
 A Model Context Protocol server that provides access to Organisational Sharepoint.
 
-## Components
+## Implementation 
 
-### Tools
-- Connects to Sharepoint using Microsoft Graph API
-- Exposes Sharepoint documents and file system as resources
-- Provides tools for searching documents and reading documents
-- Includes prompts for common Sharepoint tasks
+| Component          | Operation            | Resource | Dynamic Resource | Tool |
+|--------------------|---------------------|----------|------------------|------|
+| Users              |                     | ❌        | ❌               | ❌   |
+|                    | Read User           | ❌        | ❌               | ❌   |
+|                    | Find User           | ❌        | ❌               | ❌   |
+| Sites              |                     | ❌        | ❌               | ❌   |
+|                    | List Sites          | ✅        | ❌               | ❌   |
+|                    | Get Site Details    | ❌        | ❌               | ❌   |
+|                    | Create Subsite      | ❌        | ❌               | ❌   |
+|                    | Delete Site         | ❌        | ❌               | ❌   |
+| Drives             |                     | ❌        | ❌               | ❌   |
+|                    | List Folders        | ❌        | ❌               | ❌   |
+|                    | Search Folders      | ❌        | ❌               | ✅   |
+|                    | Create Folder       | ❌        | ❌               | ❌   |
+|                    | Delete Folder       | ❌        | ❌               | ❌   |
+|                    | Upload File         | ❌        | ❌               | ❌   |
+|                    | List Items          | ❌        | ✅               | ❌   |
+|                    | Download File       | ❌        | ❌               | ✅   |
+|                    | Read File           | ✅        | ❌               | ❌   |
+|                    | Move File           | ❌        | ❌               | ❌   |
+|                    | Copy File           | ❌        | ❌               | ❌   |
+| Lists              |                     | ❌        | ❌               | ❌   |
+|                    | Create List         | ❌        | ❌               | ❌   |
+|                    | Read List           | ❌        | ❌               | ❌   |
+|                    | Add to List         | ❌        | ❌               | ❌   |
+|                    | Update List         | ❌        | ❌               | ❌   |
+|                    | Delete List         | ❌        | ❌               | ❌   |
+| Calendar           |                     | ❌        | ❌               | ❌   |
+|                    | Create Event        | ❌        | ❌               | ❌   |
+|                    | Read Event          | ❌        | ❌               | ❌   |
+|                    | Update Event        | ❌        | ❌               | ❌   |
+|                    | Delete Event        | ❌        | ❌               | ❌   |
+
+### Prompts
+
+- document-summary
+- find-relevant-documents
+- explore-folder
 
 ## Enviremental Variables
 
@@ -68,8 +101,6 @@ pnpm run build
   }
 }
 ```
-
-
 
 ## License
 
