@@ -26,3 +26,6 @@ package-lock.json
 
 # Ignore .env   
 .env
+
+# folders
+/output

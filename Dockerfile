@@ -1,5 +1,8 @@
-# Use the official Bun image as the base image
-FROM oven/bun:latest AS builder
+# Use the official Node.js image as the base image
+FROM node:22-slim AS builder
+
+# Install pnpm globally
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -8,15 +11,19 @@ WORKDIR /app
 COPY src /app/src
 COPY tsconfig.json /app/tsconfig.json
 COPY package.json /app/package.json
+COPY pnpm-lock.yaml /app/pnpm-lock.yaml
 
-# Install dependencies using Bun
-RUN bun install
+# Install dependencies using pnpm
+RUN pnpm install
 
 # Compile TypeScript to JavaScript
-RUN bun run build
+RUN pnpm run build
 
-# Use a lightweight Bun runtime image for the release stage
-FROM oven/bun:latest AS release
+# Use a lightweight Node.js runtime image for the release stage
+FROM node:22-slim AS release
+
+# Install pnpm globally
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -28,4 +35,4 @@ COPY --from=builder /app /app
 ENV NODE_ENV=production
 
 # Run the application
-ENTRYPOINT ["bun", "run", "start"]
+ENTRYPOINT ["pnpm", "start"]

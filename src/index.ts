@@ -10,13 +10,13 @@ import { ClientSecret } from "microsoft-graph/models/ClientSecret";
 import dotenv from "dotenv";
 
 import { createDriveRef } from "microsoft-graph/services/drive";
-import { get } from "http";
 import { createSiteRef } from "microsoft-graph/services/site";
 import { DriveId } from "microsoft-graph/models/DriveId";
 import listDriveItems from "microsoft-graph/operations/driveItem/listDriveItems";
 import { createDriveItemRef } from "microsoft-graph/services/driveItem";
 import { DriveItemId } from "microsoft-graph/models/DriveItemId";
 import getDriveItem from "microsoft-graph/operations/driveItem/getDriveItem";
+import listSites from "microsoft-graph/operations/site/listSites";
 dotenv.config();
 
 // Initialize the MCP server and SharePoint connector
@@ -35,15 +35,30 @@ async function createSharepointMcpServer() {
   });
 
   const contextRef = register(tenantId, clientId, clientSecret);
-
   const siteRef = createSiteRef(contextRef, siteId);
   const driveRef = createDriveRef(siteRef, driveId);
+
   // Resource: Folder contents (root or specific folder)
   server.resource(
     "folder",
     new ResourceTemplate("sharepoint://folder/{folderId?}", { list: undefined }),
     async (uri) => {
       const items = await listDriveItems(driveRef);
+      return {
+        contents: [{
+          uri: uri.href,
+          text: JSON.stringify(items, null, 2)
+        }]
+      };
+    }
+  );
+
+  // Resource: Sites 
+  server.resource(
+    "sites",
+    "sharepoint://sites",
+    async (uri) => {
+      const items = await listSites(contextRef);
       return {
         contents: [{
           uri: uri.href,
@@ -63,9 +78,11 @@ async function createSharepointMcpServer() {
       return {
         contents: [{
           uri: uri.href,
-          text: typeof result.content === 'string'
-            ? result.content
-            : JSON.stringify(result.content, null, 2)
+          text: result.content
+            ? (typeof result.content === 'string'
+                ? result.content
+                : JSON.stringify(result.content, null, 2))
+            : "No content available" // Fallback value
         }]
       };
     }
@@ -86,7 +103,7 @@ async function createSharepointMcpServer() {
         return {
           content: [{
             type: "text",
-            text: JSON.stringify(results, null, 2)
+            text: JSON.stringify(results, null, 2) // Ensure this is a valid string
           }]
         };
       } catch (error) {
@@ -94,6 +111,38 @@ async function createSharepointMcpServer() {
           content: [{
             type: "text",
             text: `Error searching documents: ${error}`
+          }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  // Download document content
+  server.tool(
+    "download-document",
+    {
+      documentId: z.string().describe("The ID of the document to download")
+    },
+    async ({ documentId }) => {
+      try {
+        const driveItemRef = createDriveItemRef(driveRef, documentId as DriveItemId);
+        const result = await getDriveItem(driveItemRef);
+        return {
+          content: [{
+            type: "text",
+            text: result.content
+              ? (typeof result.content === 'string'
+                  ? result.content
+                  : JSON.stringify(result.content, null, 2))
+              : "No content available" // Fallback value
+          }]
+        };
+      } catch (error) {
+        return {
+          content: [{
+            type: "text",
+            text: `Error downloading document: ${error}`
           }],
           isError: true
         };
@@ -163,12 +212,6 @@ async function main() {
 
   // Create and start the server
   const server = await createSharepointMcpServer();
-  
-  // Log available capabilities
-  console.log("SharePoint MCP Server initialized with:");
-  console.log("Resources: sharepoint://folder/{folderId?}, sharepoint://document/{documentId}");
-  console.log("Tools: search-documents");
-  console.log("Prompts: document-summary, find-relevant-documents, explore-folder");
 
   // Connect using stdio transport
   const transport = new StdioServerTransport();

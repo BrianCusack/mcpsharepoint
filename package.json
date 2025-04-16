@@ -5,12 +5,12 @@
   "main": "index.js",
   "type": "module",
   "bin": {
-    "sharepoint": "./build/index.js"
+    "sharepoint": "./dist/index.js"
   },
   "scripts": {
-    "build": "bun run tsc",
-    "start": "bun src/index.ts",
-    "lint": "bun run eslint --config eslint.config.ts"
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
   },
   "keywords": [],
   "author": "",
@@ -20,7 +20,7 @@
     "@microsoft/microsoft-graph-client": "^3.0.7",
     "@modelcontextprotocol/sdk": "^1.9.0",
     "dotenv": "^16.4.7",
-    "microsoft-graph": "^2.7.6",
+    "microsoft-graph": "^2.8.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
@@ -30,9 +30,7 @@
     "globals": "^16.0.0",
     "jiti": "^2.4.2",
     "typescript": "^5.8.2",
-    "typescript-eslint": "^8.28.0"
-  },
-  "engines": {
-    "bun": ">=0.5.0"
+    "typescript-eslint": "^8.28.0",
+    "tsx": "^4.19.3"
   }
 }
